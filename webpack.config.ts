@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import url from 'node:url';
+import RemarkHTML from 'remark-html';
 import { Server } from 'socket.io';
 import TerserPlugin from 'terser-webpack-plugin';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
@@ -50,8 +51,9 @@ function common_path(lhs: string, rhs: string) {
 }
 
 function glob_script_files() {
-  const files: string[] = globSync(`src/**/index.{ts,js}`)
-    .filter(file => process.env.CI !== 'true' || !fs.readFileSync(path.join(__dirname, file)).includes('@no-ci'));
+  const files: string[] = globSync(`src/**/index.{ts,js}`).filter(
+    file => process.env.CI !== 'true' || !fs.readFileSync(path.join(__dirname, file)).includes('@no-ci'),
+  );
 
   const results: string[] = [];
   const handle = (file: string) => {
@@ -232,6 +234,22 @@ function parse_configuration(entry: Entry): (_env: any, argv: any) => webpack.Co
               use: 'html-loader',
               exclude: /node_modules/,
             },
+            {
+              test: /\.md$/,
+              use: [
+                {
+                  loader: 'html-loader',
+                },
+                {
+                  loader: 'remark-loader',
+                  options: {
+                    remarkOptions: {
+                      plugins: [RemarkHTML],
+                    },
+                  },
+                },
+              ],
+            },
           ].concat(
             entry.html === undefined
               ? <any[]>[
@@ -334,21 +352,23 @@ function parse_configuration(entry: Entry): (_env: any, argv: any) => webpack.Co
             'pinia',
             '@vueuse/core',
             { from: 'dedent', imports: [['default', 'dedent']] },
+            { from: 'klona', imports: ['klona'] },
+            { from: 'vue-final-modal', imports: ['useModal'] },
             { from: 'zod', imports: ['z'] },
           ],
         }),
         unpluginVueComponents({
           dts: true,
           syncMode: 'overwrite',
-          resolvers: [VueUseComponentsResolver(), VueUseDirectiveResolver()],
           // globs: ['src/panel/component/*.vue'],
+          resolvers: [VueUseComponentsResolver(), VueUseDirectiveResolver()],
         }),
         new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
         new webpack.DefinePlugin({
           __VUE_OPTIONS_API__: false,
           __VUE_PROD_DEVTOOLS__: process.env.CI !== 'true',
-          __VUE_PROD_HYDRATION_MISMATCH_DETAIL__: false
-        })
+          __VUE_PROD_HYDRATION_MISMATCH_DETAIL__: false,
+        }),
       )
       .concat(
         should_obfuscate
@@ -428,6 +448,7 @@ function parse_configuration(entry: Entry): (_env: any, argv: any) => webpack.Co
       const global = {
         jquery: '$',
         lodash: '_',
+        showdown: 'showdown',
         toastr: 'toastr',
         vue: 'Vue',
         'vue-router': 'VueRouter',

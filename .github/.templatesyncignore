@@ -2,6 +2,8 @@
 .github/*
 .gitignore
 .vscode/settings.json
+public/*
+single_html_backup/*
 @types
 dist
 README.md
