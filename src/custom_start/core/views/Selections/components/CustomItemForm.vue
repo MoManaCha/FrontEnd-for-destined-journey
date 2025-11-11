@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { FormInput, FormLabel, FormNumber, FormTextarea } from '../../../components/Form';
+import { useCustomContentStore } from '../../../store/customContent';
 import type { Equipment, Item, Rarity, Skill } from '../../../types';
 import { calculateCostByPosition, getCostRange } from '../../../utils/cost-calculator';
 
@@ -10,19 +11,57 @@ interface Emits {
 
 const emit = defineEmits<Emits>();
 
+// 使用自定义内容 store
+const customContentStore = useCustomContentStore();
+
 // 折叠状态
 const isExpanded = ref(false);
 
 // 表单数据
-const categoryType = ref<'equipment' | 'item' | 'skill'>('equipment'); // 大分类，用于确定添加到哪个列表
-const customItemType = ref(''); // 物品的 type 属性，由玩家自定义
-const itemName = ref('');
-const itemRarity = ref<Rarity>('common');
-const itemTag = ref('');
-const itemEffect = ref('');
-const itemDescription = ref('');
-const itemConsume = ref(''); // 仅技能需要
-const itemQuantity = ref(1); // 仅物品需要
+const categoryType = computed({
+  get: () => customContentStore.customItemForm.categoryType,
+  set: (value: 'equipment' | 'item' | 'skill') => customContentStore.updateCustomItemForm('categoryType', value),
+});
+
+const customItemType = computed({
+  get: () => customContentStore.customItemForm.customItemType,
+  set: (value: string) => customContentStore.updateCustomItemForm('customItemType', value),
+});
+
+const itemName = computed({
+  get: () => customContentStore.customItemForm.itemName,
+  set: (value: string) => customContentStore.updateCustomItemForm('itemName', value),
+});
+
+const itemRarity = computed({
+  get: () => customContentStore.customItemForm.itemRarity,
+  set: (value: Rarity) => customContentStore.updateCustomItemForm('itemRarity', value),
+});
+
+const itemTag = computed({
+  get: () => customContentStore.customItemForm.itemTag,
+  set: (value: string) => customContentStore.updateCustomItemForm('itemTag', value),
+});
+
+const itemEffect = computed({
+  get: () => customContentStore.customItemForm.itemEffect,
+  set: (value: string) => customContentStore.updateCustomItemForm('itemEffect', value),
+});
+
+const itemDescription = computed({
+  get: () => customContentStore.customItemForm.itemDescription,
+  set: (value: string) => customContentStore.updateCustomItemForm('itemDescription', value),
+});
+
+const itemConsume = computed({
+  get: () => customContentStore.customItemForm.itemConsume,
+  set: (value: string) => customContentStore.updateCustomItemForm('itemConsume', value),
+});
+
+const itemQuantity = computed({
+  get: () => customContentStore.customItemForm.itemQuantity,
+  set: (value: number) => customContentStore.updateCustomItemForm('itemQuantity', value),
+});
 
 // 品质选项
 const rarityOptions: { value: Rarity; label: string; color: string }[] = [
@@ -60,14 +99,7 @@ const isValid = computed(() => {
 
 // 重置表单
 const resetForm = () => {
-  itemName.value = '';
-  customItemType.value = '';
-  itemRarity.value = 'common';
-  itemTag.value = '';
-  itemEffect.value = '';
-  itemDescription.value = '';
-  itemConsume.value = '';
-  itemQuantity.value = 1;
+  customContentStore.resetCustomItemForm();
 };
 
 // 添加自定义物品
@@ -105,7 +137,6 @@ const handleAdd = () => {
 
   emit('add', newItem, categoryType.value);
   resetForm();
-  isExpanded.value = false; // 添加后自动折叠
 };
 </script>
 
@@ -113,7 +144,7 @@ const handleAdd = () => {
   <div class="custom-item-form" :class="{ expanded: isExpanded }">
     <div class="form-header" @click="isExpanded = !isExpanded">
       <div class="header-left">
-        <h3 class="form-title">✨ 自定义物品</h3>
+        <h3 class="form-title">✨ 自定义</h3>
         <div class="form-desc">创建您的专属物品、装备或技能</div>
       </div>
       <div class="toggle-icon" :class="{ rotated: isExpanded }">▼</div>

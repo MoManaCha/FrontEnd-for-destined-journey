@@ -9,7 +9,19 @@ interface Skills {
 }
 
 // 主动技能
-export const ActiveSkills: Skills = {};
+export const ActiveSkills: Skills = {
+  龙族: [
+    {
+      name: '龙王之怒',
+      cost: 1,
+      type: '主动技能',
+      tag: '技能',
+      rarity: 'only',
+      effect: '对目标造成 1 点伤害。',
+      description: '龙族技能：龙王之怒',
+    },
+  ],
+};
 
 // 被动技能
 export const PassiveSkills: Skills = {};

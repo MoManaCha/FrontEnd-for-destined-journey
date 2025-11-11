@@ -3,6 +3,7 @@ import { computed, inject, onMounted, ref, watch, type Ref } from 'vue';
 import { getBackgrounds } from '../../data/backgrounds';
 import { getAllDestinedOnes } from '../../data/destined-ones';
 import { useCharacterStore } from '../../store/character';
+import { useCustomContentStore } from '../../store/customContent';
 import type { Background, DestinedOne } from '../../types';
 import BackgroundCategoryNav from './components/BackgroundCategoryNav.vue';
 import BackgroundList from './components/BackgroundList.vue';
@@ -12,6 +13,7 @@ import DestinyPointsExchange from './components/DestinyPointsExchange.vue';
 import LevelTabs from './components/LevelTabs.vue';
 
 const characterStore = useCharacterStore();
+const customContentStore = useCustomContentStore();
 
 // 接收 layout 提供的触发器
 const randomGenerateTrigger = inject<Ref<number>>('randomGenerateTrigger', ref(0));
@@ -22,7 +24,6 @@ const currentLevel = ref<string>('');
 
 // 初始剧情相关状态
 const currentBackgroundCategory = ref<string>('');
-const customBackgroundDescription = ref<string>('');
 
 // 提取分类和层级为计算属性，遵循 DRY 原则
 const destinedOneLevels = computed(() => Object.keys(getAllDestinedOnes()));
@@ -65,7 +66,7 @@ const handleSelectBackground = (background: Background) => {
 
 // 更新自定义开局描述
 const handleUpdateCustomDescription = (value: string) => {
-  customBackgroundDescription.value = value;
+  customContentStore.updateCustomBackgroundDescription(value);
   // 如果当前选中的是自定义开局，更新 store 中的描述
   if (characterStore.selectedBackground?.name === '【自定义开局】') {
     const updatedBackground: Background = {
@@ -112,7 +113,7 @@ const handleRandomGenerate = () => {
 const handleReset = () => {
   characterStore.selectedDestinedOnes.splice(0);
   characterStore.setBackground(null);
-  customBackgroundDescription.value = '';
+  customContentStore.updateCustomBackgroundDescription('');
 
   // 重置命运点数和已兑换的转生点数
   characterStore.setDestinyPoints(0);
@@ -132,7 +133,7 @@ const handleReset = () => {
 const handleClearAll = () => {
   characterStore.selectedDestinedOnes.splice(0);
   characterStore.setBackground(null);
-  customBackgroundDescription.value = '';
+  customContentStore.updateCustomBackgroundDescription('');
 };
 
 // 监听随机生成触发器

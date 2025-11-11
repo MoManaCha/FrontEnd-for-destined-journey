@@ -1,3 +1,5 @@
+import type { Attributes } from '../types';
+
 export const GENDERS = ['男', '女', '雌性', '雄性', '自定义'] as const;
 
 // 种族消耗点数
@@ -8,6 +10,7 @@ export const RACE_COSTS: Record<string, number> = {
   翼民: 10,
   矮人: 10,
   魔物: 10,
+  女妖: 10,
   半身人: 10,
   亡灵种族: 10,
   深渊魔族: 20,
@@ -17,7 +20,7 @@ export const RACE_COSTS: Record<string, number> = {
   血族: 50,
   龙族: 60,
   自定义: 80,
-};
+} as const;
 
 // 身份消耗点数
 export const IDENTITY_COSTS: Record<string, number> = {
@@ -29,7 +32,7 @@ export const IDENTITY_COSTS: Record<string, number> = {
   中产阶级: 20,
   贵族阶级: 40,
   自定义: 80,
-};
+} as const;
 
 export const START_LOCATIONS = [
   '大陆东南部区域-索伦蒂斯王国',
@@ -54,7 +57,7 @@ export const START_LOCATIONS = [
  * 暗号：名字包含特定字符序列
  */
 const checkDevModeByName = (name: string): boolean => {
-  // 暗号：姓名中包含 "[dev]" 或 "[test]"（不区分大小写）
+  // 暗号
   const devPatterns = ['[dev]', '[test]', '田所浩二'];
   const lowerName = name.toLowerCase();
   return devPatterns.some(pattern => lowerName.includes(pattern));
@@ -62,9 +65,8 @@ const checkDevModeByName = (name: string): boolean => {
 
 /**
  * 生成随机初始转生点数
- * 范围: 100-1000
- * 概率分布: 降低300以上的概率
- * 使用加权随机，倾向于生成较低的点数
+ * 范围: 1000-10000
+ * 更好的加权随机
  * @param characterName 可选的角色名，用于检测开发者模式
  */
 export const generateInitialPoints = (characterName?: string): number => {
@@ -74,26 +76,19 @@ export const generateInitialPoints = (characterName?: string): number => {
   }
 
   const random = Math.random();
+  const weight = 3;
+  const weightRandom = Math.pow(random, weight);
 
-  // 70% 概率: 100-300 点
-  if (random < 0.7) {
-    return Math.floor(Math.random() * 201) + 100; // 100-300
-  }
-  // 20% 概率: 300-500 点
-  else if (random < 0.9) {
-    return Math.floor(Math.random() * 201) + 300; // 300-500
-  }
-  // 10% 概率: 500-1000 点
-  else {
-    return Math.floor(Math.random() * 501) + 500; // 500-1000
-  }
+  const result = Math.floor(1000 + weightRandom * (10000 - 1000 + 1));
+
+  return Math.min(result, 10000);
 };
 
 // 初始转生点数（默认值）
-export const INITIAL_REINCARNATION_POINTS = 300;
+export const INITIAL_REINCARNATION_POINTS = 1000;
 
 // 属性列表
-export const ATTRIBUTES = ['力量', '敏捷', '体质', '智力', '精神'] as const;
+export const ATTRIBUTES: (keyof Attributes)[] = ['力量', '敏捷', '体质', '智力', '精神'];
 
 // 等级相关常量
 export const MAX_LEVEL = 10;
@@ -102,7 +97,7 @@ export const MIN_LEVEL = 1;
 // 基础属性值
 export const BASE_STAT = 4;
 
-export const raceAttrs: { [key: string]: { 力量: number; 敏捷: number; 体质: number; 智力: number; 精神: number } } = {
+export const raceAttrs: Record<string, Attributes> = {
   地精: { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 },
   人类: { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 },
   兽族: { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 },

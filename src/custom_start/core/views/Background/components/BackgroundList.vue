@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import FormTextarea from '../../../components/Form/FormTextarea.vue';
+import { useCustomContentStore } from '../../../store/customContent';
 import type { Background } from '../../../types';
 
 interface Props {
@@ -17,6 +18,9 @@ interface Emits {
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
+
+// 使用自定义内容 store
+const customContentStore = useCustomContentStore();
 
 // 折叠状态管理
 const expandedCards = ref<Set<string>>(new Set());
@@ -61,7 +65,10 @@ const meetsRequirements = (item: Background) => {
 };
 
 // 自定义开局描述
-const customDescription = ref('');
+const customDescription = computed({
+  get: () => customContentStore.customBackgroundDescription,
+  set: (value: string) => customContentStore.updateCustomBackgroundDescription(value),
+});
 
 // 处理选择
 const handleSelect = (item: Background) => {
@@ -72,7 +79,7 @@ const handleSelect = (item: Background) => {
 
 // 处理自定义描述更新
 const handleCustomDescriptionUpdate = (value: string) => {
-  customDescription.value = value;
+  customContentStore.updateCustomBackgroundDescription(value);
   emit('update:customDescription', value);
 };
 

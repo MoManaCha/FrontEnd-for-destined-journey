@@ -4,6 +4,7 @@ import FormInput from '../../../components/Form/FormInput.vue';
 import FormLabel from '../../../components/Form/FormLabel.vue';
 import FormNumber from '../../../components/Form/FormNumber.vue';
 import FormTextarea from '../../../components/Form/FormTextarea.vue';
+import { useCustomContentStore } from '../../../store/customContent';
 import type { DestinedOne } from '../../../types';
 import { calculateDestinedCost } from '../../../utils/cost-calculator';
 
@@ -12,6 +13,9 @@ interface Emits {
 }
 
 const emit = defineEmits<Emits>();
+
+// 使用自定义内容 store
+const customContentStore = useCustomContentStore();
 
 // 折叠状态
 const isExpanded = ref(false);
@@ -28,25 +32,100 @@ const LEVEL_GRADE_MAP: Record<number, { name: string; minGrade: number; maxGrade
 };
 
 // 表单数据
-const itemName = ref('');
-const itemLevel = ref(1); // 层级 1-7
-const itemLifeLevel = ref('');
-const itemGrade = ref(1);
-const itemRace = ref('');
-const itemIdentity = ref('');
-const itemCareer = ref('');
-const itemPersonality = ref('');
-const itemLike = ref('');
-const itemApp = ref('');
-const itemCloth = ref('');
-const itemEquip = ref('');
-const itemAttributes = ref('');
-const itemStairway = ref('');
-const itemIsContract = ref('是');
-const itemAffinity = ref(0);
-const itemComment = ref('');
-const itemBackgroundInfo = ref('');
-const itemSkills = ref('');
+const itemName = computed({
+  get: () => customContentStore.customDestinedOneForm.itemName,
+  set: (value: string) => customContentStore.updateCustomDestinedOneForm('itemName', value),
+});
+
+const itemLevel = computed({
+  get: () => customContentStore.customDestinedOneForm.itemLevel,
+  set: (value: number) => customContentStore.updateCustomDestinedOneForm('itemLevel', value),
+});
+
+const itemLifeLevel = computed({
+  get: () => customContentStore.customDestinedOneForm.itemLifeLevel,
+  set: (value: string) => customContentStore.updateCustomDestinedOneForm('itemLifeLevel', value),
+});
+
+const itemGrade = computed({
+  get: () => customContentStore.customDestinedOneForm.itemGrade,
+  set: (value: number) => customContentStore.updateCustomDestinedOneForm('itemGrade', value),
+});
+
+const itemRace = computed({
+  get: () => customContentStore.customDestinedOneForm.itemRace,
+  set: (value: string) => customContentStore.updateCustomDestinedOneForm('itemRace', value),
+});
+
+const itemIdentity = computed({
+  get: () => customContentStore.customDestinedOneForm.itemIdentity,
+  set: (value: string) => customContentStore.updateCustomDestinedOneForm('itemIdentity', value),
+});
+
+const itemCareer = computed({
+  get: () => customContentStore.customDestinedOneForm.itemCareer,
+  set: (value: string) => customContentStore.updateCustomDestinedOneForm('itemCareer', value),
+});
+
+const itemPersonality = computed({
+  get: () => customContentStore.customDestinedOneForm.itemPersonality,
+  set: (value: string) => customContentStore.updateCustomDestinedOneForm('itemPersonality', value),
+});
+
+const itemLike = computed({
+  get: () => customContentStore.customDestinedOneForm.itemLike,
+  set: (value: string) => customContentStore.updateCustomDestinedOneForm('itemLike', value),
+});
+
+const itemApp = computed({
+  get: () => customContentStore.customDestinedOneForm.itemApp,
+  set: (value: string) => customContentStore.updateCustomDestinedOneForm('itemApp', value),
+});
+
+const itemCloth = computed({
+  get: () => customContentStore.customDestinedOneForm.itemCloth,
+  set: (value: string) => customContentStore.updateCustomDestinedOneForm('itemCloth', value),
+});
+
+const itemEquip = computed({
+  get: () => customContentStore.customDestinedOneForm.itemEquip,
+  set: (value: string) => customContentStore.updateCustomDestinedOneForm('itemEquip', value),
+});
+
+const itemAttributes = computed({
+  get: () => customContentStore.customDestinedOneForm.itemAttributes,
+  set: (value: string) => customContentStore.updateCustomDestinedOneForm('itemAttributes', value),
+});
+
+const itemStairway = computed({
+  get: () => customContentStore.customDestinedOneForm.itemStairway,
+  set: (value: string) => customContentStore.updateCustomDestinedOneForm('itemStairway', value),
+});
+
+const itemIsContract = computed({
+  get: () => customContentStore.customDestinedOneForm.itemIsContract,
+  set: (value: string) => customContentStore.updateCustomDestinedOneForm('itemIsContract', value),
+});
+
+const itemAffinity = computed({
+  get: () => customContentStore.customDestinedOneForm.itemAffinity,
+  set: (value: number) => customContentStore.updateCustomDestinedOneForm('itemAffinity', value),
+});
+
+const itemComment = computed({
+  get: () => customContentStore.customDestinedOneForm.itemComment,
+  set: (value: string) => customContentStore.updateCustomDestinedOneForm('itemComment', value),
+});
+
+const itemBackgroundInfo = computed({
+  get: () => customContentStore.customDestinedOneForm.itemBackgroundInfo,
+  set: (value: string) => customContentStore.updateCustomDestinedOneForm('itemBackgroundInfo', value),
+});
+
+const itemSkills = computed({
+  get: () => customContentStore.customDestinedOneForm.itemSkills,
+  set: (value: string) => customContentStore.updateCustomDestinedOneForm('itemSkills', value),
+});
 
 // 根据层级计算点数
 const calculatedCost = computed(() => {
@@ -81,25 +160,12 @@ const isValid = computed(() => {
 
 // 重置表单
 const resetForm = () => {
-  itemName.value = '';
-  itemLevel.value = 1;
-  itemLifeLevel.value = '';
-  itemGrade.value = 1;
-  itemRace.value = '';
-  itemIdentity.value = '';
-  itemCareer.value = '';
-  itemPersonality.value = '';
-  itemLike.value = '';
-  itemApp.value = '';
-  itemCloth.value = '';
-  itemEquip.value = '';
-  itemAttributes.value = '';
-  itemStairway.value = '';
-  itemIsContract.value = '是';
-  itemAffinity.value = 0;
-  itemComment.value = '';
-  itemBackgroundInfo.value = '';
-  itemSkills.value = '';
+  customContentStore.resetCustomDestinedOneForm();
+  // 重置后触发生命层级的更新
+  const levelInfo = LEVEL_GRADE_MAP[itemLevel.value];
+  if (levelInfo) {
+    itemLifeLevel.value = levelInfo.name;
+  }
 };
 
 // 解析数组字符串（用换行或逗号分隔）
@@ -220,7 +286,6 @@ const handleAdd = () => {
 
   emit('add', newItem);
   resetForm();
-  isExpanded.value = false; // 添加后自动折叠
 };
 </script>
 
