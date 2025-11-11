@@ -5,7 +5,6 @@ import type { DestinedOne } from '../../../types';
 interface Props {
   items: DestinedOne[];
   selectedItems: DestinedOne[];
-  availablePoints: number;
 }
 
 interface Emits {
@@ -39,16 +38,11 @@ const isSelected = (item: DestinedOne) => {
   return props.selectedItems.some(selected => selected.name === item.name);
 };
 
-// 检查是否可以选择
-const canSelect = (item: DestinedOne) => {
-  return props.availablePoints >= item.cost;
-};
-
 // 处理选择
 const handleToggle = (item: DestinedOne) => {
   if (isSelected(item)) {
     emit('deselect', item);
-  } else if (canSelect(item)) {
+  } else {
     emit('select', item);
   }
 };
@@ -63,7 +57,6 @@ const handleToggle = (item: DestinedOne) => {
       class="destined-one-card"
       :class="{
         selected: isSelected(item),
-        disabled: !isSelected(item) && !canSelect(item),
         expanded: isExpanded(item.name),
       }"
       @click="handleToggle(item)"
@@ -71,7 +64,6 @@ const handleToggle = (item: DestinedOne) => {
       <div class="card-header">
         <h3 class="item-name">{{ item.name }}</h3>
         <div class="header-actions">
-          <div class="item-cost">{{ item.cost }} 点</div>
           <button class="expand-btn" @click="toggleExpand(item.name, $event)">
             {{ isExpanded(item.name) ? '收起' : '展开' }}
           </button>
@@ -300,12 +292,6 @@ const handleToggle = (item: DestinedOne) => {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-  }
-
-  .item-cost {
-    font-weight: 600;
-    color: var(--accent-color);
-    font-size: 1rem;
   }
 
   .expand-btn {

@@ -5,7 +5,6 @@ import type { Equipment, Item, Skill } from '../../../types';
 interface Props {
   items: (Equipment | Item | Skill)[];
   selectedItems: (Equipment | Item | Skill)[];
-  availablePoints: number;
 }
 
 interface Emits {
@@ -19,12 +18,6 @@ const emit = defineEmits<Emits>();
 // 检查物品是否已被选中
 const isSelected = (item: Equipment | Item | Skill) => {
   return props.selectedItems.some(selected => selected.name === item.name);
-};
-
-// 检查物品是否因点数不足而被禁用
-const isDisabled = (item: Equipment | Item | Skill) => {
-  if (isSelected(item)) return false;
-  return item.cost > props.availablePoints;
 };
 
 const handleSelect = (item: Equipment | Item | Skill) => {
@@ -48,7 +41,6 @@ const handleDeselect = (item: Equipment | Item | Skill) => {
         :key="item.name"
         :item="item"
         :selected="isSelected(item)"
-        :disabled="isDisabled(item)"
         @select="handleSelect"
         @deselect="handleDeselect"
       />

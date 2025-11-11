@@ -4,14 +4,6 @@ import { useCharacterStore } from '../../store/character';
 
 const characterStore = useCharacterStore();
 
-// 计算总消耗点数
-const totalConsumed = computed(() => characterStore.consumedPoints);
-
-// 计算剩余点数
-const remainingPoints = computed(() => {
-  return characterStore.character.reincarnationPoints - totalConsumed.value;
-});
-
 // 获取显示的性别
 const displayGender = computed(() => {
   return characterStore.character.gender === '自定义'
@@ -63,30 +55,6 @@ const rarityColorMap: Record<string, string> = {
 
       <!-- 文档内容 -->
       <div class="panel-content">
-        <!-- 点数统计 -->
-        <section class="doc-section points-section">
-          <div class="points-grid">
-            <div class="point-item">
-              <span class="point-label">转生点数</span>
-              <span class="point-value gold">{{ characterStore.character.reincarnationPoints }}</span>
-            </div>
-            <div class="point-item">
-              <span class="point-label">已消耗</span>
-              <span class="point-value">{{ totalConsumed }}</span>
-            </div>
-            <div class="point-item">
-              <span class="point-label">剩余</span>
-              <span class="point-value" :class="{ negative: remainingPoints < 0, positive: remainingPoints >= 0 }">
-                {{ remainingPoints }}
-              </span>
-            </div>
-            <div class="point-item destiny">
-              <span class="point-label">命运点数</span>
-              <span class="point-value purple">{{ characterStore.character.destinyPoints }}</span>
-            </div>
-          </div>
-        </section>
-
         <!-- 基本信息 -->
         <section class="doc-section">
           <h3 class="section-title">📋 基本信息</h3>
@@ -122,7 +90,6 @@ const rarityColorMap: Record<string, string> = {
               <p class="item-title">
                 <strong>{{ index + 1 }}. </strong>
                 <span :style="{ color: rarityColorMap[item.rarity] }">{{ item.name }}</span>
-                <span class="item-cost">[{{ item.cost }} 点]</span>
               </p>
               <p class="item-meta">
                 类型：{{ item.type }}<span v-if="item.tag"> | 标签：{{ item.tag }}</span>
@@ -143,7 +110,6 @@ const rarityColorMap: Record<string, string> = {
                 <strong>{{ index + 1 }}. </strong>
                 <span :style="{ color: rarityColorMap[item.rarity] }">{{ item.name }}</span>
                 <span v-if="item.quantity" class="item-quantity">× {{ item.quantity }}</span>
-                <span class="item-cost">[{{ item.cost }} 点]</span>
               </p>
               <p class="item-meta">
                 类型：{{ item.type }}<span v-if="item.tag"> | 标签：{{ item.tag }}</span>
@@ -163,7 +129,6 @@ const rarityColorMap: Record<string, string> = {
               <p class="item-title">
                 <strong>{{ index + 1 }}. </strong>
                 <span :style="{ color: rarityColorMap[skill.rarity] }">{{ skill.name }}</span>
-                <span class="item-cost">[{{ skill.cost }} 点]</span>
               </p>
               <p class="item-meta">
                 类型：{{ skill.type }}
@@ -184,7 +149,6 @@ const rarityColorMap: Record<string, string> = {
             <div v-for="(one, index) in characterStore.selectedDestinedOnes" :key="one.name" class="destined-entry">
               <p class="item-title">
                 <strong>{{ index + 1 }}. {{ one.name }}</strong>
-                <span class="item-cost">[{{ one.cost }} 点]</span>
               </p>
               <p class="item-meta">
                 {{ one.race }} | {{ one.identity.join('、') }} | Lv.{{ one.level }} | {{ one.lifeLevel }}
@@ -231,14 +195,6 @@ const rarityColorMap: Record<string, string> = {
           </div>
           <p v-else class="empty-text">未选择初始开局剧情</p>
         </section>
-
-        <!-- 提示信息 -->
-        <div v-if="remainingPoints !== 0" class="final-notice">
-          <div v-if="remainingPoints < 0" class="notice warning">
-            ⚠️ 警告：转生点数不足 {{ Math.abs(remainingPoints) }} 点，请返回调整
-          </div>
-          <div v-else class="notice info">💡 提示：还有 {{ remainingPoints }} 点转生点数未使用</div>
-        </div>
       </div>
     </div>
   </div>
@@ -276,64 +232,6 @@ const rarityColorMap: Record<string, string> = {
 
 .panel-content {
   padding: var(--spacing-lg);
-}
-
-// 点数统计区域
-.points-section {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(212, 175, 55, 0.02) 100%);
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-md) !important;
-  margin-bottom: var(--spacing-lg) !important;
-}
-
-.points-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacing-md);
-
-  .point-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-sm);
-    background: var(--card-bg);
-    border-radius: var(--radius-md);
-
-    &.destiny {
-      background: linear-gradient(135deg, rgba(156, 39, 176, 0.1) 0%, rgba(156, 39, 176, 0.05) 100%);
-    }
-
-    .point-label {
-      font-size: 0.85rem;
-      color: var(--text-light);
-      font-weight: 500;
-    }
-
-    .point-value {
-      font-size: 1.5rem;
-      font-weight: 700;
-      font-family: var(--font-mono);
-      color: var(--text-color);
-
-      &.gold {
-        color: var(--accent-color);
-      }
-
-      &.purple {
-        color: #9c27b0;
-      }
-
-      &.positive {
-        color: var(--success-color);
-      }
-
-      &.negative {
-        color: var(--error-color);
-      }
-    }
-  }
 }
 
 // 文档区块
@@ -411,14 +309,6 @@ const rarityColorMap: Record<string, string> = {
       font-weight: 600;
       margin-left: var(--spacing-xs);
     }
-
-    .item-cost {
-      font-size: 0.9rem;
-      color: var(--accent-color);
-      font-weight: 600;
-      font-family: var(--font-mono);
-      margin-left: var(--spacing-xs);
-    }
   }
 
   .item-meta {
@@ -469,31 +359,6 @@ const rarityColorMap: Record<string, string> = {
   font-style: italic;
 }
 
-// 最终提示
-.final-notice {
-  margin-top: var(--spacing-lg);
-
-  .notice {
-    padding: var(--spacing-md);
-    border-radius: var(--radius-md);
-    font-size: 0.95rem;
-    font-weight: 600;
-    text-align: center;
-
-    &.warning {
-      background: rgba(244, 67, 54, 0.1);
-      color: var(--error-color);
-      border: 2px solid var(--error-color);
-    }
-
-    &.info {
-      background: rgba(33, 150, 243, 0.1);
-      color: #2196f3;
-      border: 2px solid #2196f3;
-    }
-  }
-}
-
 // 响应式设计
 @media (max-width: 768px) {
   .panel-header {
@@ -506,10 +371,6 @@ const rarityColorMap: Record<string, string> = {
 
   .panel-content {
     padding: var(--spacing-md);
-  }
-
-  .points-grid {
-    grid-template-columns: repeat(2, 1fr);
   }
 
   .doc-text.attributes {

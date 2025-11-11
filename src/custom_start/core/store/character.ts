@@ -1,16 +1,6 @@
 import { defineStore } from 'pinia';
 import { computed, ref, watch } from 'vue';
-import {
-  ATTRIBUTES,
-  BASE_STAT,
-  calculateAPByLevel,
-  generateInitialPoints,
-  getTierAttributeBonus,
-  IDENTITY_COSTS,
-  INITIAL_REINCARNATION_POINTS,
-  RACE_COSTS,
-  raceAttrs,
-} from '../data/base-info';
+import { ATTRIBUTES, BASE_STAT, calculateAPByLevel, getTierAttributeBonus, raceAttrs, RACES } from '../data/base-info';
 import { getActiveSkills, getPassiveSkills } from '../data/skills';
 import type { Attributes, Background, CharacterConfig, DestinedOne, Equipment, Item, Skill } from '../types';
 
@@ -35,7 +25,6 @@ export const useCharacterStore = defineStore('character', () => {
       智力: 0,
       精神: 0,
     },
-    reincarnationPoints: INITIAL_REINCARNATION_POINTS, // 转生点数
     destinyPoints: 0, // 命运点数
   });
 
@@ -49,49 +38,6 @@ export const useCharacterStore = defineStore('character', () => {
   const selectedBackground = ref<Background | null>(null);
 
   // Computed
-
-  // 已兑换为命运点数的转生点数
-  const exchangedReincarnationPoints = ref(0);
-
-  /**
-   * 计算当前消耗的转生点数
-   */
-  const consumedPoints = computed(() => {
-    let total = 0;
-
-    // 种族消耗
-    const raceCost = RACE_COSTS[character.value.race] || 0;
-    total += raceCost;
-
-    // 身份消耗
-    const identityCost = IDENTITY_COSTS[character.value.identity] || 0;
-    total += identityCost;
-
-    // 属性加点消耗 (每点1个转生点)
-    const attributeAddPoints = usedAP.value;
-    total += attributeAddPoints;
-
-    // 装备消耗
-    const equipmentCost = selectedEquipments.value.reduce((sum, item) => sum + item.cost, 0);
-    total += equipmentCost;
-
-    // 道具消耗
-    const itemCost = selectedItems.value.reduce((sum, item) => sum + item.cost, 0);
-    total += itemCost;
-
-    // 技能消耗
-    const skillCost = selectedSkills.value.reduce((sum, skill) => sum + skill.cost, 0);
-    total += skillCost;
-
-    // 命定之人消耗
-    const destinedOnesCost = selectedDestinedOnes.value.reduce((sum, one) => sum + one.cost, 0);
-    total += destinedOnesCost;
-
-    // 兑换命运点数消耗的转生点数
-    total += exchangedReincarnationPoints.value;
-
-    return total;
-  });
 
   // Actions
 
@@ -115,12 +61,6 @@ export const useCharacterStore = defineStore('character', () => {
     }
   };
 
-  const rollInitialPoints = () => {
-    const newPoints = generateInitialPoints(character.value.name);
-    character.value.reincarnationPoints = newPoints;
-    return newPoints;
-  };
-
   const resetCharacter = () => {
     character.value = {
       name: '',
@@ -141,7 +81,6 @@ export const useCharacterStore = defineStore('character', () => {
         智力: 0,
         精神: 0,
       },
-      reincarnationPoints: INITIAL_REINCARNATION_POINTS,
       destinyPoints: 0,
     };
   };
@@ -203,21 +142,8 @@ export const useCharacterStore = defineStore('character', () => {
     selectedBackground.value = background;
   };
 
-  // 命运点数兑换相关操作
-  const exchangeDestinyPoints = (reincarnationPoints: number) => {
-    // 1 转生点 = 10 命运点
-    const destinyPointsToAdd = reincarnationPoints * 10;
-    character.value.destinyPoints += destinyPointsToAdd;
-    // 记录已兑换的转生点数
-    exchangedReincarnationPoints.value += reincarnationPoints;
-  };
-
   const setDestinyPoints = (points: number) => {
     character.value.destinyPoints = Math.max(0, points);
-  };
-
-  const resetExchangedPoints = () => {
-    exchangedReincarnationPoints.value = 0;
   };
 
   // 属性点相关计算
@@ -265,7 +191,7 @@ export const useCharacterStore = defineStore('character', () => {
       const currentRace = character.value.race === '自定义' ? character.value.customRace : character.value.race;
 
       // 获取所有种族列表
-      const raceSpecificCategories = Object.keys(RACE_COSTS).filter(race => race !== '自定义');
+      const raceSpecificCategories = RACES.filter(race => race !== '自定义');
 
       // 获取技能数据
       const activeSkills = getActiveSkills();
@@ -295,7 +221,7 @@ export const useCharacterStore = defineStore('character', () => {
         }
 
         // 如果技能分类是种族特定的，且不匹配当前种族，移除该技能
-        if (raceSpecificCategories.includes(skillCategory) && skillCategory !== currentRace) {
+        if (raceSpecificCategories.includes(skillCategory as any) && skillCategory !== currentRace) {
           selectedSkills.value.splice(i, 1);
         }
       }
@@ -305,8 +231,6 @@ export const useCharacterStore = defineStore('character', () => {
 
   return {
     character,
-    consumedPoints,
-    exchangedReincarnationPoints,
     selectedEquipments,
     selectedItems,
     selectedSkills,
@@ -322,7 +246,6 @@ export const useCharacterStore = defineStore('character', () => {
     updateAttribute,
     addAttributePoint,
     removeAttributePoint,
-    rollInitialPoints,
     resetCharacter,
     addEquipment,
     removeEquipment,
@@ -334,8 +257,6 @@ export const useCharacterStore = defineStore('character', () => {
     addDestinedOne,
     removeDestinedOne,
     setBackground,
-    exchangeDestinyPoints,
     setDestinyPoints,
-    resetExchangedPoints,
   };
 });

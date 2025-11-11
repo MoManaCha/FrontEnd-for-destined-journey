@@ -2,37 +2,37 @@ import type { Attributes } from '../types';
 
 export const GENDERS = ['男', '女', '雌性', '雄性', '自定义'] as const;
 
-// 种族消耗点数
-export const RACE_COSTS: Record<string, number> = {
-  地精: -10,
-  人类: 0,
-  兽族: 0,
-  翼民: 10,
-  矮人: 10,
-  魔物: 10,
-  女妖: 10,
-  半身人: 10,
-  亡灵种族: 10,
-  深渊魔族: 20,
-  巨人: 30,
-  妖精: 30,
-  精灵: 40,
-  血族: 50,
-  龙族: 60,
-  自定义: 80,
-} as const;
+// 种族列表
+export const RACES = [
+  '地精',
+  '人类',
+  '兽族',
+  '翼民',
+  '矮人',
+  '魔物',
+  '女妖',
+  '半身人',
+  '亡灵种族',
+  '深渊魔族',
+  '巨人',
+  '妖精',
+  '精灵',
+  '血族',
+  '龙族',
+  '自定义',
+] as const;
 
-// 身份消耗点数
-export const IDENTITY_COSTS: Record<string, number> = {
-  沦为奴隶: -20,
-  魔王残党: -20,
-  自由平民: 0,
-  游荡亡灵: 0,
-  野生魔物: 0,
-  中产阶级: 20,
-  贵族阶级: 40,
-  自定义: 80,
-} as const;
+// 身份列表
+export const IDENTITIES = [
+  '沦为奴隶',
+  '魔王残党',
+  '自由平民',
+  '游荡亡灵',
+  '野生魔物',
+  '中产阶级',
+  '贵族阶级',
+  '自定义',
+] as const;
 
 export const START_LOCATIONS = [
   '大陆东南部区域-索伦蒂斯王国',
@@ -51,41 +51,6 @@ export const START_LOCATIONS = [
   '无尽海东部-碎星群岛-蓝泪岛',
   '自定义',
 ] as const;
-
-/**
- * 检查是否启用开发者模式（通过姓名暗号）
- * 暗号：名字包含特定字符序列
- */
-const checkDevModeByName = (name: string): boolean => {
-  // 暗号
-  const devPatterns = ['[dev]', '[test]', '田所浩二'];
-  const lowerName = name.toLowerCase();
-  return devPatterns.some(pattern => lowerName.includes(pattern));
-};
-
-/**
- * 生成随机初始转生点数
- * 范围: 1000-10000
- * 更好的加权随机
- * @param characterName 可选的角色名，用于检测开发者模式
- */
-export const generateInitialPoints = (characterName?: string): number => {
-  // 开发者模式：如果角色名包含特定暗号，返回高点数
-  if (characterName && checkDevModeByName(characterName)) {
-    return 114514;
-  }
-
-  const random = Math.random();
-  const weight = 3;
-  const weightRandom = Math.pow(random, weight);
-
-  const result = Math.floor(1000 + weightRandom * (10000 - 1000 + 1));
-
-  return Math.min(result, 10000);
-};
-
-// 初始转生点数（默认值）
-export const INITIAL_REINCARNATION_POINTS = 1000;
 
 // 属性列表
 export const ATTRIBUTES: (keyof Attributes)[] = ['力量', '敏捷', '体质', '智力', '精神'];

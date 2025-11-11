@@ -9,7 +9,6 @@ import BackgroundCategoryNav from './components/BackgroundCategoryNav.vue';
 import BackgroundList from './components/BackgroundList.vue';
 import CustomDestinedOneForm from './components/CustomDestinedOneForm.vue';
 import DestinedOneList from './components/DestinedOneList.vue';
-import DestinyPointsExchange from './components/DestinyPointsExchange.vue';
 import LevelTabs from './components/LevelTabs.vue';
 
 const characterStore = useCharacterStore();
@@ -39,11 +38,6 @@ const currentDestinedOnes = computed<DestinedOne[]>(() => {
 const currentBackgrounds = computed<Background[]>(() => {
   if (!currentBackgroundCategory.value) return [];
   return getBackgrounds()[currentBackgroundCategory.value] || [];
-});
-
-// 计算可用点数
-const availablePoints = computed(() => {
-  return characterStore.character.reincarnationPoints - characterStore.consumedPoints;
 });
 
 // 命定之人操作
@@ -77,11 +71,6 @@ const handleUpdateCustomDescription = (value: string) => {
   }
 };
 
-// 命运点数兑换
-const handleExchangeDestinyPoints = (reincarnationPoints: number) => {
-  characterStore.exchangeDestinyPoints(reincarnationPoints);
-};
-
 // 随机生成
 const handleRandomGenerate = () => {
   // 随机选择一个命定之人
@@ -89,11 +78,9 @@ const handleRandomGenerate = () => {
     const randomIndex = Math.floor(Math.random() * currentDestinedOnes.value.length);
     const randomDestinedOne = currentDestinedOnes.value[randomIndex];
 
-    if (availablePoints.value >= randomDestinedOne.cost) {
-      // 清空已选命定之人
-      characterStore.selectedDestinedOnes.splice(0);
-      characterStore.addDestinedOne(randomDestinedOne);
-    }
+    // 清空已选命定之人
+    characterStore.selectedDestinedOnes.splice(0);
+    characterStore.addDestinedOne(randomDestinedOne);
   }
 
   // 随机选择一个背景（排除自定义开局）
@@ -114,10 +101,6 @@ const handleReset = () => {
   characterStore.selectedDestinedOnes.splice(0);
   characterStore.setBackground(null);
   customContentStore.updateCustomBackgroundDescription('');
-
-  // 重置命运点数和已兑换的转生点数
-  characterStore.setDestinyPoints(0);
-  characterStore.resetExchangedPoints();
 
   // 重置到第一个分类
   if (destinedOneLevels.value.length > 0) {
@@ -174,7 +157,6 @@ onMounted(() => {
         <DestinedOneList
           :items="currentDestinedOnes"
           :selected-items="characterStore.selectedDestinedOnes"
-          :available-points="availablePoints"
           @select="handleSelectDestinedOne"
           @deselect="handleDeselectDestinedOne"
         />
@@ -183,13 +165,6 @@ onMounted(() => {
 
     <!-- 自定义命定之人表单 -->
     <CustomDestinedOneForm @add="handleAddCustomDestinedOne" />
-
-    <!-- 命运点数兑换 -->
-    <DestinyPointsExchange
-      :available-points="availablePoints"
-      :current-destiny-points="characterStore.character.destinyPoints"
-      @exchange="handleExchangeDestinyPoints"
-    />
 
     <!-- 初始剧情区域 -->
     <section class="background-section">
@@ -219,14 +194,7 @@ onMounted(() => {
     <section class="summary-section">
       <div class="summary-card">
         <div class="summary-header">
-          <div class="summary-title-row">
-            <h3 class="summary-title">已选择</h3>
-            <div class="points-info">
-              <span class="points-value" :class="{ insufficient: availablePoints < 0 }">{{ availablePoints }}</span>
-              <span class="points-separator">/</span>
-              <span class="points-total">{{ characterStore.character.reincarnationPoints }}</span>
-            </div>
-          </div>
+          <h3 class="summary-title">已选择</h3>
           <button
             v-if="characterStore.selectedDestinedOnes.length > 0 || characterStore.selectedBackground"
             class="clear-btn"
@@ -243,7 +211,6 @@ onMounted(() => {
             <div class="summary-items">
               <div v-for="one in characterStore.selectedDestinedOnes" :key="one.name" class="summary-item">
                 <span class="item-name">{{ one.name }}</span>
-                <span class="item-cost">{{ one.cost }} 点</span>
               </div>
             </div>
           </div>
@@ -377,43 +344,10 @@ onMounted(() => {
   border-bottom: 1px solid var(--border-color);
 }
 
-.summary-title-row {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-}
-
 .summary-title {
   font-size: 1.2rem;
   color: var(--title-color);
   margin: 0;
-}
-
-.points-info {
-  display: flex;
-  align-items: baseline;
-  gap: var(--spacing-xs);
-  font-size: 1rem;
-  font-weight: 600;
-
-  .points-value {
-    color: var(--accent-color);
-    font-size: 1.2rem;
-
-    &.insufficient {
-      color: var(--error-color);
-    }
-  }
-
-  .points-separator {
-    color: var(--text-light);
-    font-size: 1rem;
-  }
-
-  .points-total {
-    color: var(--text-light);
-    font-size: 1rem;
-  }
 }
 
 .clear-btn {
@@ -478,11 +412,6 @@ onMounted(() => {
   .item-name {
     color: var(--text-color);
   }
-
-  .item-cost {
-    color: var(--accent-color);
-    font-weight: 600;
-  }
 }
 
 .empty-state {
@@ -538,13 +467,6 @@ onMounted(() => {
   .summary-header {
     flex-wrap: wrap;
     gap: var(--spacing-sm);
-  }
-
-  .summary-title-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-xs);
-    flex: 1 1 100%;
   }
 
   .clear-btn {

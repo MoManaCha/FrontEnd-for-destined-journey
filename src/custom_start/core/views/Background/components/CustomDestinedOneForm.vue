@@ -6,7 +6,6 @@ import FormNumber from '../../../components/Form/FormNumber.vue';
 import FormTextarea from '../../../components/Form/FormTextarea.vue';
 import { useCustomContentStore } from '../../../store/customContent';
 import type { DestinedOne } from '../../../types';
-import { calculateDestinedCost } from '../../../utils/cost-calculator';
 
 interface Emits {
   (e: 'add', item: DestinedOne): void;
@@ -125,11 +124,6 @@ const itemBackgroundInfo = computed({
 const itemSkills = computed({
   get: () => customContentStore.customDestinedOneForm.itemSkills,
   set: (value: string) => customContentStore.updateCustomDestinedOneForm('itemSkills', value),
-});
-
-// 根据层级计算点数
-const calculatedCost = computed(() => {
-  return calculateDestinedCost(itemLevel.value);
 });
 
 // 当前层级的等级范围
@@ -263,7 +257,6 @@ const handleAdd = () => {
 
   const newItem: DestinedOne = {
     name: itemName.value.trim(),
-    cost: calculatedCost.value,
     lifeLevel: itemLifeLevel.value.trim() || '未知',
     level: itemGrade.value,
     race: itemRace.value.trim(),
@@ -319,10 +312,6 @@ const handleAdd = () => {
           >
             第{{ ['一', '二', '三', '四', '五', '六', '七'][level - 1] }}层级
           </button>
-        </div>
-        <div class="cost-info">
-          <span class="cost-label">消耗点数：</span>
-          <span class="cost-value">{{ calculatedCost }}</span>
         </div>
       </div>
 
@@ -587,20 +576,6 @@ const handleAdd = () => {
 
     input[type='radio'] {
       cursor: pointer;
-    }
-  }
-
-  .cost-info {
-    margin-top: var(--spacing-xs);
-    font-size: 0.85rem;
-    color: var(--text-light);
-
-    .cost-value {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--accent-color);
-      font-family: var(--font-mono);
-      margin: 0 var(--spacing-xs);
     }
   }
 

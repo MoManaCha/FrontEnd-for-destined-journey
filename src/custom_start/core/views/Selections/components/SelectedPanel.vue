@@ -5,9 +5,6 @@ interface Props {
   equipments: Equipment[];
   items: Item[];
   skills: Skill[];
-  availablePoints: number;
-  totalPoints: number;
-  consumedPoints: number;
 }
 
 interface Emits {
@@ -29,13 +26,6 @@ const handleClear = () => {
 const totalCount = computed(() => {
   return props.equipments.length + props.items.length + props.skills.length;
 });
-
-const totalCost = computed(() => {
-  const equipmentCost = props.equipments.reduce((sum, item) => sum + item.cost, 0);
-  const itemCost = props.items.reduce((sum, item) => sum + item.cost, 0);
-  const skillCost = props.skills.reduce((sum, item) => sum + item.cost, 0);
-  return equipmentCost + itemCost + skillCost;
-});
 </script>
 
 <template>
@@ -44,14 +34,6 @@ const totalCost = computed(() => {
       <div class="header-top">
         <h3 class="title">已选项目</h3>
         <div class="count-badge">{{ totalCount }}</div>
-      </div>
-      <div class="points-info">
-        <span class="points-label">转生点数：</span>
-        <span class="points-value" :class="{ negative: availablePoints < 0 }">
-          {{ availablePoints }}
-        </span>
-        <span class="points-total">/ {{ totalPoints }}</span>
-        <span class="points-consumed">（已消耗：{{ consumedPoints }}）</span>
       </div>
     </div>
 
@@ -66,7 +48,6 @@ const totalCost = computed(() => {
           <div v-for="item in equipments" :key="item.name" class="selected-item">
             <div class="item-info">
               <div class="item-name">{{ item.name }}</div>
-              <div class="item-cost">{{ item.cost }} 点</div>
             </div>
             <button class="remove-btn" @click="handleRemove(item, 'equipment')">×</button>
           </div>
@@ -86,7 +67,6 @@ const totalCost = computed(() => {
                 {{ item.name }}
                 <span v-if="item.quantity" class="item-quantity">× {{ item.quantity }}</span>
               </div>
-              <div class="item-cost">{{ item.cost }} 点</div>
             </div>
             <button class="remove-btn" @click="handleRemove(item, 'item')">×</button>
           </div>
@@ -103,7 +83,6 @@ const totalCost = computed(() => {
           <div v-for="item in skills" :key="item.name" class="selected-item">
             <div class="item-info">
               <div class="item-name">{{ item.name }}</div>
-              <div class="item-cost">{{ item.cost }} 点</div>
             </div>
             <button class="remove-btn" @click="handleRemove(item, 'skill')">×</button>
           </div>
@@ -117,12 +96,8 @@ const totalCost = computed(() => {
       </div>
     </div>
 
-    <div class="panel-footer">
-      <div class="total-info">
-        <span class="label">总消耗：</span>
-        <span class="value">{{ totalCost }} 点</span>
-      </div>
-      <button v-if="totalCount > 0" class="clear-btn" @click="handleClear">清空全部</button>
+    <div v-if="totalCount > 0" class="panel-footer">
+      <button class="clear-btn" @click="handleClear">清空全部</button>
     </div>
   </div>
 </template>
@@ -169,39 +144,6 @@ const totalCost = computed(() => {
       border-radius: 50%;
       font-weight: 700;
       font-size: 1rem;
-    }
-
-    .points-info {
-      display: flex;
-      align-items: baseline;
-      gap: var(--spacing-xs);
-      font-size: 0.9rem;
-
-      .points-label {
-        color: var(--text-light);
-        font-weight: 500;
-      }
-
-      .points-value {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: var(--accent-color);
-        font-family: var(--font-mono);
-
-        &.negative {
-          color: var(--error-color);
-        }
-      }
-
-      .points-total {
-        color: var(--text-light);
-        font-family: var(--font-mono);
-      }
-
-      .points-consumed {
-        color: var(--text-light);
-        font-size: 0.85rem;
-      }
     }
   }
 
@@ -274,13 +216,6 @@ const totalCost = computed(() => {
               color: #4caf50;
             }
           }
-
-          .item-cost {
-            font-size: 0.85rem;
-            color: var(--accent-color);
-            font-family: var(--font-mono);
-            margin-top: 2px;
-          }
         }
 
         .remove-btn {
@@ -334,29 +269,11 @@ const totalCost = computed(() => {
     padding: var(--spacing-lg);
     border-top: 2px solid var(--border-color);
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    gap: var(--spacing-md);
-
-    .total-info {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-xs);
-
-      .label {
-        font-size: 0.95rem;
-        color: var(--text-light);
-      }
-
-      .value {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: var(--accent-color);
-        font-family: var(--font-mono);
-      }
-    }
 
     .clear-btn {
+      width: 100%;
       padding: var(--spacing-sm) var(--spacing-lg);
       background: var(--error-color);
       color: white;
@@ -459,23 +376,8 @@ const totalCost = computed(() => {
 
     .panel-footer {
       padding: var(--spacing-md);
-      flex-direction: column;
-      align-items: stretch;
-
-      .total-info {
-        justify-content: center;
-
-        .label {
-          font-size: 0.9rem;
-        }
-
-        .value {
-          font-size: 1.1rem;
-        }
-      }
 
       .clear-btn {
-        width: 100%;
         font-size: 0.85rem;
       }
     }

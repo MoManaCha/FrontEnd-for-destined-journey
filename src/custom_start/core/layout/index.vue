@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 import { useCharacterStore } from '../store';
 import { generateAIPrompt, writeCharacterToMvu } from '../utils/data-exporter';
@@ -10,19 +9,7 @@ const route = useRoute();
 const characterStore = useCharacterStore();
 const { character } = storeToRefs(characterStore);
 
-// 计算可用点数
-const availablePoints = computed(() => {
-  const consumed = characterStore.consumedPoints;
-  return character.value.reincarnationPoints - consumed;
-});
-
-// 判断是否可以 Roll 点数（只有在没有消耗点数时才允许）
-const canRollPoints = computed(() => {
-  return characterStore.consumedPoints === 0;
-});
-
 const stepRef = ref<InstanceType<typeof Steps> | null>(null);
-
 // 创建事件触发器
 const randomGenerateTrigger = ref(0);
 const resetPageTrigger = ref(0);
@@ -30,11 +17,6 @@ const resetPageTrigger = ref(0);
 // 通过 provide 提供给子组件
 provide('randomGenerateTrigger', randomGenerateTrigger);
 provide('resetPageTrigger', resetPageTrigger);
-
-// Roll 转生点数
-const handleRollPoints = () => {
-  characterStore.rollInitialPoints();
-};
 
 // 随机生成当前页面内容
 const handleRandomGenerate = () => {
@@ -135,11 +117,8 @@ const handleStartJourney = async () => {
 // 判断是否可以点击上一页
 const canGoPrevious = computed(() => currentStep.value > 1);
 
-// 判断“踏上旅程”按钮是否应被禁用
+// 判断"踏上旅程"按钮是否应被禁用
 const isNextButtonDisabled = computed(() => {
-  if (currentStep.value === stepTitles.value.length) {
-    return availablePoints.value < 0;
-  }
   return false;
 });
 
@@ -168,25 +147,6 @@ watch(
   <div class="layout">
     <h1 class="main-title">命定之诗与黄昏之歌</h1>
 
-    <!-- 转生点数显示和 Roll 点按钮 -->
-    <div class="points-panel">
-      <div class="points-display">
-        <span class="points-label">可用转生点：</span>
-        <span class="points-value" :class="{ negative: availablePoints < 0 }">
-          {{ availablePoints }}
-        </span>
-        <span class="points-total">/ {{ character.reincarnationPoints }}</span>
-      </div>
-      <button
-        class="roll-button"
-        :disabled="!canRollPoints"
-        :title="canRollPoints ? '随机生成新的转生点数' : '已消耗点数，无法重新 Roll（请先重置）'"
-        @click="handleRollPoints"
-      >
-        <span class="button-text">🎲 Roll 点数</span>
-      </button>
-    </div>
-
     <Steps ref="stepRef" :steps="stepTitles" :step="currentStep" />
 
     <!-- 随机生成和重置按钮（确认页面不显示） -->
@@ -214,12 +174,7 @@ watch(
         <span class="text">上一步</span>
       </button>
 
-      <button
-        class="nav-button next-button"
-        :disabled="isNextButtonDisabled"
-        :title="isNextButtonDisabled ? '可用转生点数不能为负' : undefined"
-        @click="handleNext"
-      >
+      <button class="nav-button next-button" :disabled="isNextButtonDisabled" @click="handleNext">
         <span class="text">{{ nextButtonText }}</span>
       </button>
     </div>
@@ -238,96 +193,6 @@ watch(
   text-align: center;
   margin-bottom: var(--spacing-lg);
   color: var(--title-color);
-}
-
-// 转生点数面板
-.points-panel {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-lg);
-}
-
-.points-display {
-  display: flex;
-  align-items: baseline;
-  gap: var(--spacing-sm);
-  font-size: 1.1rem;
-  font-weight: 600;
-
-  .points-label {
-    color: var(--text-color);
-  }
-
-  .points-value {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--accent-color);
-    transition: var(--transition-normal);
-
-    &.negative {
-      color: var(--error-color);
-      animation: shake 0.3s ease-in-out;
-    }
-  }
-
-  .points-total {
-    color: var(--text-light);
-    font-size: 1rem;
-  }
-}
-
-.roll-button {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-xs) var(--spacing-md);
-  background: linear-gradient(135deg, var(--accent-color) 0%, #b8941f 100%);
-  color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition-normal);
-  box-shadow: var(--shadow-sm);
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    background: linear-gradient(135deg, #e0c04a 0%, #d4af37 100%);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-    box-shadow: var(--shadow-sm);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background: var(--border-color-light);
-    color: var(--text-light);
-
-    &:hover {
-      transform: none;
-      box-shadow: var(--shadow-sm);
-    }
-  }
-}
-
-@keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-5px);
-  }
-  75% {
-    transform: translateX(5px);
-  }
 }
 
 .content-area {
@@ -473,14 +338,6 @@ watch(
 @media (max-width: 768px) {
   .layout {
     padding: var(--spacing-md);
-  }
-
-  .points-display {
-    font-size: 1rem;
-
-    .points-value {
-      font-size: 1.3rem;
-    }
   }
 
   .action-buttons {

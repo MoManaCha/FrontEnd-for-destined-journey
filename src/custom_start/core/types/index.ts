@@ -4,7 +4,6 @@ export type Rarity = 'only' | 'common' | 'uncommon' | 'rare' | 'epic' | 'legenda
 // 物品类型
 export interface Item {
   name: string;
-  cost: number;
   type: string;
   tag: string;
   rarity: Rarity;
@@ -29,7 +28,6 @@ export type Skill = Omit<Item, 'quantity'> & {
 // 命定之人类型
 export interface DestinedOne {
   name: string;
-  cost: number;
   lifeLevel: string;
   level: number;
   race: string;
@@ -39,7 +37,7 @@ export interface DestinedOne {
   like: string;
   app: string;
   cloth: string;
-  equip: Partial<Omit<Equipment, 'cost'>>[];
+  equip: Partial<Equipment>[];
   attributes: {
     strength: number;
     dexterity: number;
@@ -68,7 +66,7 @@ export interface DestinedOne {
   affinity: number;
   comment?: string;
   backgroundInfo?: string;
-  skills: Omit<Skill, 'cost'>[];
+  skills: Skill[];
   isCustom?: boolean; // 标识是否为自定义数据
 }
 
@@ -104,6 +102,5 @@ export interface CharacterConfig {
   customStartLocation: string;
   level: number;
   attributePoints: Record<keyof Attributes, number>;
-  reincarnationPoints: number; // 转生点数
   destinyPoints: number; // 命运点数
 }

@@ -111,10 +111,6 @@ const isItem = (item: Equipment | Item | Skill): item is Item => {
 
     <!-- 卡片底部 -->
     <div class="card-footer">
-      <div class="item-cost">
-        <span class="cost-label">消耗点数:</span>
-        <span class="cost-value">{{ item.cost }}</span>
-      </div>
       <div v-if="selected" class="selected-badge">✓ 已选择</div>
     </div>
   </div>
@@ -260,27 +256,10 @@ const isItem = (item: Equipment | Item | Skill): item is Item => {
 
 .card-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   padding-top: var(--spacing-sm);
   border-top: 1px solid var(--border-color-light);
-
-  .item-cost {
-    display: flex;
-    gap: var(--spacing-xs);
-    align-items: center;
-
-    .cost-label {
-      font-size: 0.9rem;
-      color: var(--text-light);
-    }
-
-    .cost-value {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--accent-color);
-    }
-  }
 
   .selected-badge {
     padding: 4px 12px;
@@ -329,16 +308,6 @@ const isItem = (item: Equipment | Item | Skill): item is Item => {
   }
 
   .card-footer {
-    .item-cost {
-      .cost-label {
-        font-size: 0.85rem;
-      }
-
-      .cost-value {
-        font-size: 1rem;
-      }
-    }
-
     .selected-badge {
       font-size: 0.8rem;
       padding: 3px 10px;

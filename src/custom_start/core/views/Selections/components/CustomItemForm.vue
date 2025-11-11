@@ -3,7 +3,6 @@ import { computed, ref } from 'vue';
 import { FormInput, FormLabel, FormNumber, FormTextarea } from '../../../components/Form';
 import { useCustomContentStore } from '../../../store/customContent';
 import type { Equipment, Item, Rarity, Skill } from '../../../types';
-import { calculateCostByPosition, getCostRange } from '../../../utils/cost-calculator';
 
 interface Emits {
   (e: 'add', item: Equipment | Item | Skill, type: 'equipment' | 'item' | 'skill'): void;
@@ -81,17 +80,6 @@ const categoryOptions = [
   { value: 'skill', label: '技能' },
 ];
 
-// 根据品质计算点数（使用 0.5-1 之间的随机位置）
-const calculatedCost = computed(() => {
-  const randomPosition = 0.5 + Math.random() * 0.5;
-  return calculateCostByPosition(itemRarity.value, randomPosition);
-});
-
-// 点数范围提示
-const costRangeText = computed(() => {
-  return getCostRange(itemRarity.value);
-});
-
 // 表单验证
 const isValid = computed(() => {
   return itemName.value.trim() !== '' && customItemType.value.trim() !== '' && itemEffect.value.trim() !== '';
@@ -108,7 +96,6 @@ const handleAdd = () => {
 
   const baseItem = {
     name: itemName.value.trim(),
-    cost: calculatedCost.value,
     type: customItemType.value.trim(),
     tag: itemTag.value.trim(),
     rarity: itemRarity.value,
@@ -193,11 +180,6 @@ const handleAdd = () => {
           >
             {{ option.label }}
           </button>
-        </div>
-        <div class="cost-info">
-          <span class="cost-label">消耗点数：</span>
-          <span class="cost-value">{{ calculatedCost }}</span>
-          <span class="cost-range">（范围：{{ costRangeText }}）</span>
         </div>
       </div>
 
@@ -361,25 +343,6 @@ const handleAdd = () => {
       color: white;
       font-weight: 600;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
-  }
-
-  .cost-info {
-    margin-top: var(--spacing-xs);
-    font-size: 0.85rem;
-    color: var(--text-light);
-
-    .cost-value {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--accent-color);
-      font-family: var(--font-mono);
-      margin: 0 var(--spacing-xs);
-    }
-
-    .cost-range {
-      font-size: 0.8rem;
-      color: var(--text-light);
     }
   }
 

@@ -8,11 +8,11 @@ import {
   GENDERS,
   getLevelTierName,
   getTierAttributeBonus,
-  IDENTITY_COSTS,
+  IDENTITIES,
   MAX_LEVEL,
   MIN_LEVEL,
-  RACE_COSTS,
   raceAttrs,
+  RACES,
   START_LOCATIONS,
 } from '../../data/base-info';
 import { useCharacterStore } from '../../store';
@@ -25,9 +25,9 @@ const { addAttributePoint, removeAttributePoint } = characterStore;
 const randomGenerateTrigger = inject<Ref<number>>('randomGenerateTrigger');
 const resetPageTrigger = inject<Ref<number>>('resetPageTrigger');
 
-// 从消耗点数对象中获取选项列表
-const raceOptions = computed(() => Object.keys(RACE_COSTS));
-const identityOptions = computed(() => Object.keys(IDENTITY_COSTS));
+// 种族和身份选项列表
+const raceOptions = computed(() => RACES);
+const identityOptions = computed(() => IDENTITIES);
 
 // 计算当前等级的层级属性加成
 const tierAttributeBonus = computed(() => getTierAttributeBonus(character.value.level));
@@ -35,11 +35,6 @@ const tierAttributeBonus = computed(() => getTierAttributeBonus(character.value.
 const raceAttributeBonus = computed(() => {
   const displayRace = character.value.race === '自定义' ? character.value.customRace : character.value.race;
   return raceAttrs[displayRace] || { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 };
-});
-
-// 计算剩余可用转生点数
-const availableReincarnationPoints = computed(() => {
-  return character.value.reincarnationPoints - characterStore.consumedPoints;
 });
 
 // 计算当前等级对应的层级
@@ -155,19 +150,7 @@ const resetPage = () => {
       <div class="form-row">
         <div class="form-field">
           <FormLabel label="种族" required />
-          <FormSelect
-            v-model="character.race"
-            :options="
-              raceOptions.map(race => ({
-                label:
-                  race +
-                  (RACE_COSTS[race] !== 0
-                    ? ` (${RACE_COSTS[race] > 0 ? '-' : '+'}${Math.abs(RACE_COSTS[race])}点)`
-                    : ''),
-                value: race,
-              }))
-            "
-          />
+          <FormSelect v-model="character.race" :options="raceOptions" />
           <FormTextarea
             v-if="character.race === '自定义'"
             v-model="character.customRace"
@@ -177,19 +160,7 @@ const resetPage = () => {
         </div>
         <div class="form-field">
           <FormLabel label="身份" required />
-          <FormSelect
-            v-model="character.identity"
-            :options="
-              identityOptions.map(identity => ({
-                label:
-                  identity +
-                  (IDENTITY_COSTS[identity] !== 0
-                    ? ` (${IDENTITY_COSTS[identity] > 0 ? '-' : '+'}${Math.abs(IDENTITY_COSTS[identity])}点)`
-                    : ''),
-                value: identity,
-              }))
-            "
-          />
+          <FormSelect v-model="character.identity" :options="identityOptions" />
           <FormTextarea
             v-if="character.identity === '自定义'"
             v-model="character.customIdentity"
@@ -249,8 +220,7 @@ const resetPage = () => {
             </div>
           </div>
 
-          <div v-if="availableReincarnationPoints < 0" class="status-message error">⚠️ 转生点数不足！</div>
-          <div v-else-if="characterStore.remainingAP === 0" class="status-message success">✓ 属性点已全部分配</div>
+          <div v-if="characterStore.remainingAP === 0" class="status-message success">✓ 属性点已全部分配</div>
           <div v-else-if="characterStore.remainingAP > 0" class="status-message info">
             还有 {{ characterStore.remainingAP }} 点未分配
           </div>

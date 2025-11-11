@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, inject, onMounted, ref, watch, type Ref } from 'vue';
-import { RACE_COSTS } from '../../data/base-info';
+import { RACES } from '../../data/base-info';
 import { getEquipments } from '../../data/equipments';
 import { getInitialItems } from '../../data/Items';
 import { getActiveSkills, getPassiveSkills } from '../../data/skills';
@@ -63,9 +63,9 @@ const isSkillSubCategoryAvailable = (subCategory: string): boolean => {
     characterStore.character.race === '自定义' ? characterStore.character.customRace : characterStore.character.race;
 
   // 获取所有种族列表
-  const raceSpecificCategories = Object.keys(RACE_COSTS).filter(race => race !== '自定义');
+  const raceSpecificCategories = RACES.filter(race => race !== '自定义');
 
-  if (raceSpecificCategories.includes(subCategory)) {
+  if (raceSpecificCategories.includes(subCategory as any)) {
     return currentRace === subCategory;
   }
 
@@ -184,11 +184,6 @@ const currentSelectedItems = computed<(Equipment | Item | Skill)[]>(() => {
   }
 });
 
-// 计算可用点数
-const availablePoints = computed(() => {
-  return characterStore.character.reincarnationPoints - characterStore.consumedPoints;
-});
-
 // 选择物品
 const handleSelectItem = (item: Equipment | Item | Skill) => {
   switch (currentCategory.value) {
@@ -267,11 +262,7 @@ const handleRandomGenerate = () => {
     if (!selectedIndices.has(randomIndex)) {
       selectedIndices.add(randomIndex);
       const item = items[randomIndex];
-
-      // 检查是否有足够的点数
-      if (item.cost <= availablePoints.value) {
-        handleSelectItem(item);
-      }
+      handleSelectItem(item);
     }
   }
 };
@@ -365,7 +356,6 @@ const handleAddCustomItem = (item: Equipment | Item | Skill, type: 'equipment' |
             <ItemList
               :items="currentItems"
               :selected-items="currentSelectedItems"
-              :available-points="availablePoints"
               @select="handleSelectItem"
               @deselect="handleDeselectItem"
             />
@@ -384,9 +374,6 @@ const handleAddCustomItem = (item: Equipment | Item | Skill, type: 'equipment' |
           :equipments="characterStore.selectedEquipments"
           :items="characterStore.selectedItems"
           :skills="characterStore.selectedSkills"
-          :available-points="availablePoints"
-          :total-points="characterStore.character.reincarnationPoints"
-          :consumed-points="characterStore.consumedPoints"
           @remove="handleRemoveFromPanel"
           @clear="handleClearAll"
         />
