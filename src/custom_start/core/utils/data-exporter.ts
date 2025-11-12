@@ -42,7 +42,6 @@ export async function writeCharacterToMvu(
   const presetDestinedOnes = destinedOnes.filter(one => !one.isCustom);
 
   // 获取当前 MVU 数据以便清空现有条目
-  const chatMvuData = Mvu.getMvuData({ type: 'chat' });
   const messageMvuData = Mvu.getMvuData({ type: 'message', message_id: 'latest' });
 
   // 构建 MVU 命令字符串
@@ -52,7 +51,7 @@ export async function writeCharacterToMvu(
   mvuCommands.push(`_.set('命定系统.命运点数', ${character.destinyPoints}); // 初始化命运点数`);
 
   // 清空技能列表中的现有技能
-  const existingSkills = Mvu.getMvuVariable(chatMvuData, '技能列表', { default_value: {} });
+  const existingSkills = Mvu.getMvuVariable(messageMvuData, '技能列表', { default_value: {} });
   for (const skillName of Object.keys(existingSkills)) {
     mvuCommands.push(`_.delete('技能列表', '${skillName}'); // 删除旧技能：${skillName}`);
   }
@@ -74,7 +73,7 @@ export async function writeCharacterToMvu(
   mvuCommands.push(`_.set('财产.货币.银币', 0); // 初始化银币`);
   mvuCommands.push(`_.set('财产.货币.铜币', 0); // 初始化铜币`);
 
-  const existingItems = Mvu.getMvuVariable(chatMvuData, '财产.背包', { default_value: {} });
+  const existingItems = Mvu.getMvuVariable(messageMvuData, '财产.背包', { default_value: {} });
   for (const itemName of Object.keys(existingItems)) {
     mvuCommands.push(`_.delete('财产.背包', '${itemName}'); // 删除旧道具：${itemName}`);
   }
@@ -110,7 +109,7 @@ export async function writeCharacterToMvu(
   }
 
   // 清空命定之人列表中的现有命定之人
-  const existingDestinedOnes = Mvu.getMvuVariable(chatMvuData, '命定系统.命定之人', { default_value: {} });
+  const existingDestinedOnes = Mvu.getMvuVariable(messageMvuData, '命定系统.命定之人', { default_value: {} });
   for (const oneName of Object.keys(existingDestinedOnes)) {
     mvuCommands.push(`_.delete('命定系统.命定之人', '${oneName}'); // 删除旧命定之人：${oneName}`);
   }
@@ -176,16 +175,14 @@ export async function writeCharacterToMvu(
     );
   }
 
-  // 使用 parseMessage 解析命令并更新聊天变量和消息楼层变量
+  // 使用 parseMessage 解析命令并更新消息楼层变量
   const commandMessage = mvuCommands.join('\n');
 
-  const updatedChatData = await Mvu.parseMessage(commandMessage, chatMvuData);
   const updatedMessageData = await Mvu.parseMessage(commandMessage, messageMvuData);
 
-  if (updatedChatData && updatedMessageData) {
-    await Mvu.replaceMvuData(updatedChatData, { type: 'chat' });
+  if (updatedMessageData) {
     await Mvu.replaceMvuData(updatedMessageData, { type: 'message', message_id: 'latest' });
-    console.log('✅ 预设数据已成功写入聊天变量和消息楼层变量（保持可扩展性）');
+    console.log('✅ 预设数据已成功写入消息楼层变量（保持可扩展性）');
   } else {
     console.warn('⚠️ MVU 命令解析失败，数据未写入');
   }
@@ -224,16 +221,16 @@ export function generateAIPrompt(
 
   // 角色属性
   const tierBonus = getTierAttributeBonus(character.level);
-  let raceAttrsadditional = { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 };
+  let extraRaceAttrs = { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 };
   if (raceAttrs[displayRace] !== undefined) {
-    raceAttrsadditional = raceAttrs[displayRace];
+    extraRaceAttrs = raceAttrs[displayRace];
   }
   const finalAttrs = {
-    力量: BASE_STAT + tierBonus + character.attributePoints.力量 + raceAttrsadditional.力量,
-    敏捷: BASE_STAT + tierBonus + character.attributePoints.敏捷 + raceAttrsadditional.敏捷,
-    体质: BASE_STAT + tierBonus + character.attributePoints.体质 + raceAttrsadditional.体质,
-    智力: BASE_STAT + tierBonus + character.attributePoints.智力 + raceAttrsadditional.智力,
-    精神: BASE_STAT + tierBonus + character.attributePoints.精神 + raceAttrsadditional.精神,
+    力量: BASE_STAT + tierBonus + character.attributePoints.力量 + extraRaceAttrs.力量,
+    敏捷: BASE_STAT + tierBonus + character.attributePoints.敏捷 + extraRaceAttrs.敏捷,
+    体质: BASE_STAT + tierBonus + character.attributePoints.体质 + extraRaceAttrs.体质,
+    智力: BASE_STAT + tierBonus + character.attributePoints.智力 + extraRaceAttrs.智力,
+    精神: BASE_STAT + tierBonus + character.attributePoints.精神 + extraRaceAttrs.精神,
   };
 
   parts.push(`\n## 角色属性`);
