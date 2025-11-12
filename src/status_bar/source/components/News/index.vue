@@ -6,18 +6,44 @@ import NewsSection from './NewsSection.vue';
 
 const { statData } = useStatData();
 
-// 获取新闻数据
-const goldLionNews = computed(() => safeGet(statData.value, '每日新闻.阿斯塔利亚快讯', ''));
+// 获取新闻数据（支持新旧格式）
+// 新格式：新闻.阿斯塔利亚快讯 (对象)
+// 旧格式：每日新闻.阿斯塔利亚快讯 (字符串)
+const goldLionNews = computed(() => {
+  // 优先尝试新格式（检查 '新闻' 字段是否存在）
+  if (_.has(statData.value, '新闻.阿斯塔利亚快讯')) {
+    return safeGet(statData.value, '新闻.阿斯塔利亚快讯', {});
+  }
 
-const tavernNews = computed(() => safeGet(statData.value, '每日新闻.酒馆留言板', ''));
+  // 回退到旧格式
+  return safeGet(statData.value, '每日新闻.阿斯塔利亚快讯', '');
+});
 
-const teaPartyNews = computed(() => safeGet(statData.value, '每日新闻.午后茶会', ''));
+const tavernNews = computed(() => {
+  // 优先尝试新格式
+  if (_.has(statData.value, '新闻.酒馆留言板')) {
+    return safeGet(statData.value, '新闻.酒馆留言板', {});
+  }
+
+  // 回退到旧格式
+  return safeGet(statData.value, '每日新闻.酒馆留言板', '');
+});
+
+const teaPartyNews = computed(() => {
+  // 优先尝试新格式
+  if (_.has(statData.value, '新闻.午后茶会')) {
+    return safeGet(statData.value, '新闻.午后茶会', {});
+  }
+
+  // 回退到旧格式
+  return safeGet(statData.value, '每日新闻.午后茶会', '');
+});
 
 // 触发更新新闻
 const handleUpdateNews = () => {
   // 调用 SillyTavern 的斜杠命令
   if (typeof triggerSlash === 'function') {
-    triggerSlash('/send 更新"每日新闻"|/trigger');
+    triggerSlash('/send 更新"新闻"|/trigger');
   } else {
     console.error('triggerSlash function is not available.');
   }
