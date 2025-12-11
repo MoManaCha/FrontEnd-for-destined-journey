@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { getExtensibleItems, safeGet } from '../../utils/data-adapter';
+import { getExtensibleItems, safeGet, toBoolean } from '../../utils/data-adapter';
 import { sortItemsByRarity } from '../../utils/quality';
 import CommonStatus from '../common/CommonStatus.vue';
 import EquipmentSlot from '../common/EquipmentSlot.vue';
@@ -7,7 +7,7 @@ import SkillItem from '../common/SkillItem.vue';
 
 interface Props {
   /* 是否在场景中 */
-  bePresent: string;
+  bePresent: boolean | string;
   /** 角色名称 */
   name: string;
   /** 生命层级 */
@@ -41,7 +41,7 @@ interface Props {
   /** 登神长阶（对象） */
   ascension?: Record<string, any>;
   /** 是否缔结契约 */
-  isTied?: string;
+  isTied?: boolean | string;
   /** 好感度（格式：当前/最大） */
   affection?: number;
   /** 评价 */
@@ -237,7 +237,7 @@ const ascensionInfo = computed(() => {
     };
   }
 
-  const isEnabled = String(safeGet(props.ascension, '是否开启', '否')) === '是';
+  const isEnabled = toBoolean(safeGet(props.ascension, '是否开启', false));
 
   const elementsObj = getExtensibleItems(safeGet(props.ascension, '要素', {}));
   const powersObj = getExtensibleItems(safeGet(props.ascension, '权能', {}));
@@ -293,7 +293,7 @@ const ascensionSummary = computed(() => {
 
 // 基本信息数据结构
 const basicInfoFields = computed(() => [
-  { icon: '✔️', label: '是否在场', value: props.bePresent },
+  { icon: '✔️', label: '是否在场', value: toBoolean(props.bePresent, true) ? '是' : '否' },
   { icon: '⚜️', label: '生命层级', value: props.lifeLevel },
   { icon: '🎯', label: '等级', value: String(props.level) },
   { icon: '🧬', label: '种族', value: props.race },
@@ -319,7 +319,7 @@ const attributesFields = computed(() => {
 
 // 命运关系数据结构
 const destinyFields = computed(() => [
-  { icon: '💍', label: '是否缔结契约', value: props.isTied },
+  { icon: '💍', label: '是否缔结契约', value: toBoolean(props.isTied) ? '是' : '否' },
   { icon: '❤️', label: '好感度', value: affectionData.value.text, showBar: true },
   { icon: '💭', label: '评价', value: props.evaluation || '暂无评价' },
   { icon: '📜', label: '背景故事', value: props.backstory },

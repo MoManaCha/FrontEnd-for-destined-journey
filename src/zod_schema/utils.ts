@@ -1,3 +1,12 @@
+/** 数值范围限制 */
+export const clamp = (min: number, max: number) => (val: number) => _.clamp(val, min, max);
+
+/**
+ * 范围限制数值 schema
+ */
+export const clampedNum = (defaultVal: number, min: number, max: number) =>
+  z.coerce.number().prefault(defaultVal).transform(clamp(min, max));
+
 // 基础物品描述 schema
 export const BaseItemSchema = z.object({
   品质: z.string(),
@@ -37,7 +46,7 @@ export const DestinedEquipmentSchema = BaseItemSchema.extend({
 
 // 背包物品 schema (扩展命定装备 + 数量)
 export const InventoryItemSchema = BaseItemSchema.extend({
-  数量: z.number().prefault(1),
+  数量: z.coerce.number().prefault(1),
   类型: z.string(),
 }).transform(({ 品质, 数量, 类型, 标签, 效果, 描述 }) => ({
   品质,
@@ -50,16 +59,16 @@ export const InventoryItemSchema = BaseItemSchema.extend({
 
 // 基础属性 schema
 export const BaseAttributeSchema = z.object({
-  力量: z.number(),
-  敏捷: z.number(),
-  体质: z.number(),
-  智力: z.number(),
-  精神: z.number(),
+  力量: z.coerce.number(),
+  敏捷: z.coerce.number(),
+  体质: z.coerce.number(),
+  智力: z.coerce.number(),
+  精神: z.coerce.number(),
 });
 
 // 角色属性 schema (扩展基础属性 + 属性点)
 export const CharacterAttributeSchema = BaseAttributeSchema.extend({
-  属性点: z.number(),
+  属性点: z.coerce.number(),
 });
 
 // 神国 schema

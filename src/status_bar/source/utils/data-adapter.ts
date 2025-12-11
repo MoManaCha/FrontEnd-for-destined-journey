@@ -26,6 +26,18 @@ export function isEmpty(value: any): boolean {
 }
 
 /**
+ * 将各种布尔值格式统一转换为 boolean
+ * 兼容 "是"/"否" 字符串和 true/false 布尔值
+ */
+export function toBoolean(value: any, defaultValue: boolean = false): boolean {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    return value === '是' || value === 'true';
+  }
+  return defaultValue;
+}
+
+/**
  * 处理身份/职业等字段
  * 如果是 ["$__META_EXTENSIBLE__$"]，返回空数组
  */

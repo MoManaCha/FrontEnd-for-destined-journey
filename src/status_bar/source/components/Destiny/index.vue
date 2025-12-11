@@ -22,7 +22,7 @@ const charactersData = computed(() => {
 
   return Object.entries(characters).map(([charName, charData]: [string, any]) => ({
     name: charName,
-    bePresent: safeGet(charData, '是否在场', '是'),
+    bePresent: safeGet(charData, '是否在场', true),
     lifeLevel: safeGet(charData, '生命层级', ''),
     level: safeGet(charData, '等级', 1),
     race: safeGet(charData, '种族', ''),
@@ -35,7 +35,7 @@ const charactersData = computed(() => {
     equipment: safeGet(charData, '装备', {}),
     attributes: safeGet(charData, '属性', {}),
     ascension: safeGet(charData, '登神长阶', {}),
-    isTied: safeGet(charData, '是否缔结契约', '否'),
+    isTied: safeGet(charData, '是否缔结契约', false),
     affection: safeGet(charData, '好感度', 0),
     evaluation: safeGet(charData, '评价', ''),
     backstory: safeGet(charData, '背景故事', ''),
