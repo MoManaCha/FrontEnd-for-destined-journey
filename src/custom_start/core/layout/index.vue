@@ -125,13 +125,13 @@ const handleStartJourney = async () => {
     );
     console.log('✅ AI 提示词已生成：\n', aiPrompt);
 
-    // 3. 发送给 AI（使用 SillyTavern 的 triggerSlash 函数）
-
-    // 使用 /send 命令发送 AI 提示词
-    const sendCommand = `/send raw=true compact=false ${aiPrompt}`;
-    await triggerSlash(sendCommand);
+    // 3. 发送给 AI（使用 createChatMessages 函数，避免 slash 命令解析问题）
+    await createChatMessages([{ role: 'user', message: aiPrompt }]);
 
     console.log('✅ 角色信息已发送给 AI');
+
+    // 4. 触发 AI 回复
+    await triggerSlash('/trigger');
   } catch (error) {
     console.error('❌ 踏上旅程时发生错误：', error);
   }

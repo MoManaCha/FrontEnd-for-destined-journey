@@ -291,9 +291,7 @@ export function generateAIPrompt(
   if (background) {
     lines.push('');
     lines.push('【初始开局剧情】');
-    lines.push(`名称: ${background.name}`);
-    if (background.requiredRace) lines.push(`种族限制: ${background.requiredRace}`);
-    if (background.requiredLocation) lines.push(`地点限制: ${background.requiredLocation}`);
+    lines.push(`${background.name}`);
     lines.push(`描述: ${background.description}`);
   }
 
