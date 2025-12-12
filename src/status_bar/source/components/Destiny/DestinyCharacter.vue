@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { toggleDestinyCharacterPresence } from '../../composables/use-mvu';
+import { setDestinyCharacterPresence } from '../../composables/use-mvu';
 import { getExtensibleItems, safeGet, toBoolean } from '../../utils/data-adapter';
 import { sortItemsByRarity } from '../../utils/quality';
 import CommonStatus from '../common/CommonStatus.vue';
@@ -77,6 +77,9 @@ const props = withDefaults(defineProps<Props>(), {
 const isPresent = ref(toBoolean(props.bePresent, true));
 const isToggling = ref(false);
 
+// 记录原始值的类型（用于写回时保持类型一致，类型在新旧格式中不会变化）
+const isStringType = typeof props.bePresent === 'string';
+
 // 监听 props 变化同步状态
 watch(
   () => props.bePresent,
@@ -91,9 +94,13 @@ const doTogglePresence = async () => {
 
   isToggling.value = true;
   try {
-    const success = await toggleDestinyCharacterPresence(props.name, isPresent.value);
+    // 基于当前 UI 状态计算新值，保持原始类型
+    const newBoolState = !isPresent.value;
+    const newValue = isStringType ? (newBoolState ? '是' : '否') : newBoolState;
+
+    const success = await setDestinyCharacterPresence(props.name, newValue);
     if (success) {
-      isPresent.value = !isPresent.value;
+      isPresent.value = newBoolState;
     }
   } finally {
     isToggling.value = false;
