@@ -38,20 +38,23 @@ export async function getMvuData(): Promise<Mvu.MvuData> {
 export async function setDestinyCharacterPresence(
   characterName: string,
   newValue: boolean | string,
-) {
-  const mvuData = await getMvuData();
-  const path = `命定系统.命定之人.${characterName}.是否在场`;
+): Promise<boolean> {
+  try {
+    const mvuData = await getMvuData();
+    const path = `stat_data.命定系统.命定之人.${characterName}.是否在场`;
 
-  // 使用 MVU 的 setMvuVariable 来更新变量
-  const success = await Mvu.setMvuVariable(mvuData, path, newValue);
+    // 使用 lodash 的 _.set 来更新变量
+    _.set(mvuData, path, newValue);
 
-  if (success) {
     // 将更新后的数据写回消息楼层
     await Mvu.replaceMvuData(mvuData, {
       type: 'message',
       message_id: getCurrentMessageId(),
     });
-  }
 
-  return success;
+    return true;
+  } catch (error) {
+    console.error('设置命定之人在场状态失败:', error);
+    return false;
+  }
 }

@@ -25,7 +25,7 @@ function parseCurrency(description: string): { gold: number; silver: number; cop
 
 /**
  * 将角色数据写入到 MVU 变量中
- * 使用 Mvu.setMvuVariable 直接操作变量，比 parseMessage 更高效、更类型安全
+ * 使用 lodash 的 _.set 直接操作 stat_data，然后通过 replaceMvuData 写回
  */
 export async function writeCharacterToMvu(
   character: CharacterConfig,
@@ -42,7 +42,7 @@ export async function writeCharacterToMvu(
   const mvuData = Mvu.getMvuData({ type: 'message', message_id: 'latest' });
 
   // 命运点数
-  await Mvu.setMvuVariable(mvuData, '命定系统.命运点数', character.destinyPoints);
+  _.set(mvuData, 'stat_data.命定系统.命运点数', character.destinyPoints);
 
   // 技能列表：先清空再添加
   const skillsData: Record<string, any> = {};
@@ -56,7 +56,7 @@ export async function writeCharacterToMvu(
       描述: skill.description,
     };
   }
-  await Mvu.setMvuVariable(mvuData, '角色.技能列表', skillsData);
+  _.set(mvuData, 'stat_data.角色.技能列表', skillsData);
 
   // 货币初始化
   let goldTotal = 0;
@@ -82,10 +82,10 @@ export async function writeCharacterToMvu(
       };
     }
   }
-  await Mvu.setMvuVariable(mvuData, '背包', bagData, { reason: '初始化背包' });
-  await Mvu.setMvuVariable(mvuData, '货币.金币', goldTotal, { reason: '初始化金币' });
-  await Mvu.setMvuVariable(mvuData, '货币.银币', silverTotal, { reason: '初始化银币' });
-  await Mvu.setMvuVariable(mvuData, '货币.铜币', copperTotal, { reason: '初始化铜币' });
+  _.set(mvuData, 'stat_data.背包', bagData);
+  _.set(mvuData, 'stat_data.货币.金币', goldTotal);
+  _.set(mvuData, 'stat_data.货币.银币', silverTotal);
+  _.set(mvuData, 'stat_data.货币.铜币', copperTotal);
 
   // 命定之人
   const destinedOnesData: Record<string, any> = {};
@@ -144,7 +144,7 @@ export async function writeCharacterToMvu(
 
     destinedOnesData[one.name] = oneData;
   }
-  await Mvu.setMvuVariable(mvuData, '命定系统.命定之人', destinedOnesData);
+  _.set(mvuData, 'stat_data.命定系统.命定之人', destinedOnesData);
 
   // 将更新后的数据写回
   await Mvu.replaceMvuData(mvuData, { type: 'message', message_id: 'latest' });
